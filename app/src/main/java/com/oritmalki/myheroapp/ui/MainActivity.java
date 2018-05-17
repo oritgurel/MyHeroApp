@@ -22,11 +22,14 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterCallback {
 
     RecyclerView recyclerView;
     HeroAdapter adapter;
     List<LiveData<Hero>> heroes;
+    ImageView titleImage;
+    Toolbar toolbar;
+
 
 
 //    private HeroViewModel viewModel;
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        titleImage = findViewById(R.id.title_image);
         this.configureDagger();
         initRecyclerView();
         configureViewModel();
@@ -51,12 +55,12 @@ public class MainActivity extends AppCompatActivity {
         this.viewModel = ViewModelProviders.of(this, viewModelFactory).get(HeroViewModel.class);
         viewModel.init();
         viewModel.getHeroes().observe(this, heroes -> {
-            if (heroes != null) {
-                adapter = new HeroAdapter(heroes, getApplicationContext());
+            if (heroes != null && heroes.size() != 0) {
+                adapter = new HeroAdapter(heroes, getApplicationContext(), this::OnHeroSelected);
                 recyclerView.setAdapter(adapter);
 
                 //update title
-                initToolbar(heroes);
+//                initToolbar(heroes);
 
 
             }
@@ -74,18 +78,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initToolbar(List<Hero> heroes) {
-        Toolbar toolbar = findViewById(R.id.main_toolbar);
+        toolbar = findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(true);
 
-        ImageView titleImage = findViewById(R.id.title_image);
+
         Glide.with(this).load(heroes.get(0).getImage()).into(titleImage);
-        getSupportActionBar().setTitle(heroes.get(0).getTitle().toString());
+        getSupportActionBar().setTitle(heroes.get(0).getTitle());
 
     }
 
+    @Override
+    public void OnHeroSelected(Hero hero) {
+        toolbar = findViewById(R.id.main_toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle(hero.getTitle());
+        Glide.with(this).load(hero.getImage()).into(titleImage);
+        recyclerView.scrollBy(0, getWindow().getAttributes().y);
 
+    }
 
 
     // private void updateUI(@Nu

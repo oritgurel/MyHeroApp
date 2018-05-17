@@ -6,6 +6,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -22,10 +23,14 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroHolder> {
     List<Hero> heroes;
     Context context;
     Glide glide;
+    AdapterCallback mCallback;
+    Hero lastSelected;
+    HeroHolder lastSelectedHeart;
 
-    public HeroAdapter(List<Hero> heroes, Context context) {
+    public HeroAdapter(List<Hero> heroes, Context context, AdapterCallback callback) {
         this.heroes = heroes;
         this.context = context;
+        this.mCallback = callback;
     }
 
 
@@ -51,6 +56,17 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroHolder> {
         holder.heroAbilitiesTv.setText(builder.toString());
         holder.heart_ic.setVisibility(View.GONE);
 
+        holder.cardView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //pass selected hero to activity in order to update actionBar
+                mCallback.OnHeroSelected(heroes.get(position));
+                //show heart
+                setFavorite(heroes.get(position), holder);
+
+            }
+        });
+
 
 
     }
@@ -60,7 +76,31 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroHolder> {
         return heroes.size();
     }
 
-    static class HeroHolder extends RecyclerView.ViewHolder {
+    private void setFavorite(Hero hero, HeroHolder holder) {
+        if (lastSelected !=null) {
+            lastSelected.setFavorite(false);
+            setHeartVisibility(lastSelected, lastSelectedHeart);
+        }
+
+        hero.setFavorite(true);
+        holder.heart_ic.setVisibility(View.VISIBLE);
+        lastSelected = hero;
+        lastSelectedHeart = holder;
+
+
+    }
+
+    private void setHeartVisibility(Hero hero, HeroHolder holder) {
+        if (!hero.isFavorite()) {
+            holder.heart_ic.setVisibility(View.GONE);
+        } else {
+            holder.heart_ic.setVisibility(View.VISIBLE);
+        }
+    }
+
+
+
+        static class HeroHolder extends RecyclerView.ViewHolder {
 
         ImageView heroImage;
         TextView heroTitleTv;
@@ -78,6 +118,7 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroHolder> {
             heart_ic = itemView.findViewById(R.id.ic_heart);
             cardView = itemView.findViewById(R.id.card_view);
             mainTitleImage = itemView.findViewById(R.id.title_image);
+
         }
     }
 }

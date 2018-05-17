@@ -17,7 +17,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/item_image"
@@ -30,21 +30,21 @@
             <TextView
                 android:id="@+id/hero_name_item"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="@dimen/margin_ver"
                 android:layout_toRightOf="@+id/item_image"
+                android:layout_height="wrap_content"
                 android:textColor="@color/black"
                 android:textSize="@dimen/title_item"
                 tools:text="Wolverine"
-
                 />
 
             <TextView
                 android:id="@+id/hero_abilities_item"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/hero_name_item"
                 android:layout_toRightOf="@+id/item_image"
+                android:layout_below="@+id/hero_name_item"
+                android:layout_height="wrap_content"
                 android:textSize="@dimen/text_item"
                 tools:text="Wolverine"
                 />

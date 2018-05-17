@@ -41,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         this.configureDagger();
         initRecyclerView();
-        initToolbar();
         configureViewModel();
 
 
@@ -55,10 +54,10 @@ public class MainActivity extends AppCompatActivity {
             if (heroes != null) {
                 adapter = new HeroAdapter(heroes, getApplicationContext());
                 recyclerView.setAdapter(adapter);
-                ImageView titleImage = findViewById(R.id.title_image);
+
                 //update title
-                Glide.with(this).load(heroes.get(0).getImage()).into(titleImage);
-                getSupportActionBar().setTitle(heroes.get(0).getTitle().toString());
+                initToolbar(heroes);
+
 
             }
         });
@@ -74,15 +73,18 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(lm);
     }
 
-    private void initToolbar() {
+    private void initToolbar(List<Hero> heroes) {
         Toolbar toolbar = findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-
+        ImageView titleImage = findViewById(R.id.title_image);
+        Glide.with(this).load(heroes.get(0).getImage()).into(titleImage);
+        getSupportActionBar().setTitle(heroes.get(0).getTitle().toString());
 
     }
+
 
 
 

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="margin_hor">16dp</dimen>
+    <dimen name="margin_ver">8dp</dimen>
+    <dimen name="title_item">24sp</dimen>
+    <dimen name="text_item">14sp</dimen>
+    <dimen name="margin_ver_text">5dp</dimen>
+</resources>

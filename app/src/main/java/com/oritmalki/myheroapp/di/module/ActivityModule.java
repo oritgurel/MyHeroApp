@@ -1,0 +1,12 @@
+package com.oritmalki.myheroapp.di.module;
+
+import com.oritmalki.myheroapp.ui.MainActivity;
+
+import dagger.Module;
+import dagger.android.ContributesAndroidInjector;
+
+@Module
+public abstract class ActivityModule {
+    @ContributesAndroidInjector
+    abstract MainActivity contributeMainActivity();
+}

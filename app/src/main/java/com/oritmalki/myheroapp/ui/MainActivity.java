@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(true);
 
+
         //get initial saved data
 //        for (Hero hero : localHeroReference) {
 //            if (hero.isFavorite()) {

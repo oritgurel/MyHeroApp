@@ -12,9 +12,10 @@ import java.util.List;
 
 @Entity(tableName = "hero")
 public class Hero {
-
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     @NonNull
+    int id;
+
     @SerializedName("title")
     @Expose
     private String title;
@@ -94,5 +95,14 @@ public class Hero {
                 ", favorite=" + favorite +
                 ", lastRefresh=" + lastRefresh +
                 '}';
+    }
+
+    @NonNull
+    public int getId() {
+        return id;
+    }
+
+    public void setId(@NonNull int id) {
+        this.id = id;
     }
 }

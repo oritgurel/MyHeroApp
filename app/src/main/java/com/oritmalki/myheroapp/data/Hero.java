@@ -1,6 +1,7 @@
 package com.oritmalki.myheroapp.data;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
@@ -10,7 +11,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Date;
 import java.util.List;
 
-@Entity(tableName = "hero")
+@Entity(tableName = "hero", indices = {@Index(value = {"title","abilities","image"}, unique = true)})
 public class Hero {
     @PrimaryKey(autoGenerate = true)
     @NonNull

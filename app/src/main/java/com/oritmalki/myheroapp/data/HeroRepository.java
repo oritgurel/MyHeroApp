@@ -63,11 +63,9 @@ public class HeroRepository {
 
     public LiveData<List<Hero>> getAllHeroes() {
     executor.execute(() -> {
-        if (heroDao.getAllHeroes().getValue() == null) {
-            if (heroDao.hasHeroes(getMaxRefreshTime(new Date())) != null)
             refreshHeroes();
         }
-    });
+    );
 
         return heroDao.getAllHeroes();
     }
@@ -76,7 +74,7 @@ public class HeroRepository {
     executor.execute(() -> {
 
         //check if hero was inserted for the first time and got a date stamp
-        boolean heroExists = (heroDao.hasHeroes(getMaxRefreshTime(new Date())) != null);
+        boolean heroExists = (heroDao.hasHero(getMaxRefreshTime(new Date())) != null);
         //if hero does not exists yet, update from web
 //        if (!heroExists) {
             heroAPIService.getHeroes().enqueue(new Callback<List<Hero>>() {

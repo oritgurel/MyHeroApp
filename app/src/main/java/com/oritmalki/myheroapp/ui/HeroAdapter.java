@@ -27,7 +27,7 @@ import javax.inject.Inject;
 
 public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroHolder> {
 
-    List<? extends Hero> heroes;
+    static List<? extends Hero> heroes;
     Context context;
     Glide glide;
     AdapterCallback mCallback;

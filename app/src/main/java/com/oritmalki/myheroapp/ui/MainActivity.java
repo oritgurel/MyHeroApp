@@ -1,8 +1,13 @@
 package com.oritmalki.myheroapp.ui;
 
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,7 +22,6 @@ import com.oritmalki.myheroapp.data.Hero;
 import com.oritmalki.myheroapp.ui.HeroAdapter.HeroHolder;
 import com.oritmalki.myheroapp.viewmodel.HeroViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -36,6 +40,11 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
     private HeroHolder lastSelectedHeart;
     private String actionBarTitle;
     private String actionBarImage;
+    private CoordinatorLayout coordinatorLayout;
+    private AppBarLayout appBarLayout;
+    private int topOfScreen;
+    private Hero favHero;
+    private CollapsingToolbarLayout collapsingToolbarLayout;
 
 
 
@@ -50,32 +59,35 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        this.configureDagger();
-        initRecyclerView();
-        configureViewModel();
-
         //configure actionbar
         toolbar = findViewById(R.id.main_toolbar);
+        collapsingToolbarLayout = findViewById(R.id.main_collapsing);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(true);
 
 
-        //get initial saved data
-//        for (Hero hero : localHeroReference) {
-//            if (hero.isFavorite()) {
-//                actionBarTitle = hero.getTitle();
-//                actionBarImage = hero.getImage();
-//            }
-//        }
-
-        actionBar.setTitle(actionBarTitle);
-        titleImage = findViewById(R.id.title_image);
-        Glide.with(this).load(actionBarImage).into(titleImage);
 
 
+        this.configureDagger();
+        initRecyclerView();
+        configureViewModel();
+
+
+
+
+        //get Favorite hero from database if exists, if not - use first hero in list
+//        actionBarTitle = viewModel.getFavorite().getTitle();
+//        actionBarImage = viewModel.getFavorite().getImage();
+
+
+
+        appBarLayout = findViewById(R.id.main_appBar);
+        coordinatorLayout = findViewById(R.id.coordinator);
+        topOfScreen = coordinatorLayout.getTop();
+
+//        lastSelected = viewModel.getFavorite();
 
     }
 
@@ -91,24 +103,31 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
 
     private void configureViewModel() {
         this.viewModel = ViewModelProviders.of(this, viewModelFactory).get(HeroViewModel.class);
-         viewModel.init();
-        viewModel.getHeroes().observe(this, (List<Hero> heroes) -> {
-            if (heroes != null && heroes.size() != 0) {
-                adapter = new HeroAdapter(getApplicationContext(), this::OnHeroSelected);
-                adapter.setHeroesList(heroes, getApplicationContext());
-                recyclerView.setAdapter(adapter);
+//         viewModel.init();
+        viewModel.getHeroes().observe(this, new Observer<List<Hero>>() {
+            @Override
+            public void onChanged(@Nullable List<Hero> heroes) {
+                if (heroes != null && heroes.size() != 0) {
+                    adapter = new HeroAdapter(MainActivity.this.getApplicationContext(), MainActivity.this::OnHeroSelected);
+                    adapter.setHeroesList(heroes, MainActivity.this.getApplicationContext());
+                    recyclerView.setAdapter(adapter);
 
-                localHeroReference = new ArrayList<>();
-                for (Hero hero : heroes) {
-                    localHeroReference.add(hero);
+                    for (Hero hero : heroes) {
+                        if (hero.isFavorite())
+                            favHero = hero;
+                        }
+
+
+                    actionBarTitle = favHero.getTitle();
+                    actionBarImage = favHero.getImage();
+
+
+                    collapsingToolbarLayout.setTitle(actionBarTitle);
+                    titleImage = findViewById(R.id.title_image);
+                    Glide.with(getApplicationContext()).load(actionBarImage).into(titleImage);
+
+
                 }
-
-
-
-                //update title
-//                initToolbar(heroes);
-
-
             }
         });
     }
@@ -139,17 +158,23 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
     //callback from adapter
     @Override
     public void OnHeroSelected(Hero hero, HeroHolder heroHolder) {
-        actionBarTitle = hero.getTitle();
-        actionBar.setTitle(actionBarTitle);
-        Glide.with(this).load(hero.getImage()).into(titleImage);
+//        actionBarTitle = hero.getTitle();
+//        actionBar.setTitle(actionBarTitle);
+//        Glide.with(this).load(hero.getImage()).into(titleImage);
 
         setFavorite(hero, heroHolder);
+
+        appBarLayout.setExpanded(true);
+        coordinatorLayout.scrollTo(0, topOfScreen);
 
     }
 
     private void setFavorite(Hero hero, HeroHolder holder) {
         if (lastSelected !=null) {
             lastSelected.setFavorite(false);
+            if (lastSelectedHeart!=null) {
+                lastSelectedHeart = holder;
+            }
             setHeartVisibility(lastSelected, lastSelectedHeart);
             viewModel.saveHero(lastSelected);
 
@@ -166,9 +191,14 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
 
     private void setHeartVisibility(Hero hero, HeroHolder holder) {
         if (!hero.isFavorite()) {
-            holder.heart_ic.setVisibility(View.GONE);
-        } else {
-            holder.heart_ic.setVisibility(View.VISIBLE);
+            if (holder != null) {
+                holder.heart_ic.setVisibility(View.GONE);
+            } else  {
+                if (holder != null) {
+                    holder.heart_ic.setVisibility(View.VISIBLE);
+                }
+            }
+
         }
     }
 

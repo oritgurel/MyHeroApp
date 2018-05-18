@@ -28,6 +28,6 @@ public interface HeroDao {
 //    Hero hasHero(String title, Date lastRefreshMax);
 
     @Query("SELECT * FROM hero where lastRefresh > :lastRefreshMax LIMIT 1")
-    List<Hero> hasHeroes(Date lastRefreshMax);
+    Hero hasHero(Date lastRefreshMax);
 
 }

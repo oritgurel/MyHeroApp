@@ -33,5 +33,7 @@ public class HeroViewModel extends ViewModel {
         return heroes;
     }
 
+    public void saveHero(Hero hero) {heroRepo.saveHero(hero);}
+
 
 }

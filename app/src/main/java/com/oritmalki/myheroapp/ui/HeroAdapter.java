@@ -1,7 +1,10 @@
 package com.oritmalki.myheroapp.ui;
 
+import android.arch.lifecycle.ViewModelProvider;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.util.DiffUtil;
+import android.support.v7.util.DiffUtil.Callback;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,24 +17,70 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.oritmalki.myheroapp.R;
 import com.oritmalki.myheroapp.data.Hero;
+import com.oritmalki.myheroapp.viewmodel.HeroViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import javax.inject.Inject;
 
 public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroHolder> {
 
-    List<Hero> heroes;
+    List<? extends Hero> heroes;
     Context context;
     Glide glide;
     AdapterCallback mCallback;
     Hero lastSelected;
     HeroHolder lastSelectedHeart;
 
-    public HeroAdapter(List<Hero> heroes, Context context, AdapterCallback callback) {
-        this.heroes = heroes;
+    @Inject
+    ViewModelProvider.Factory viewModelFactory;
+    private HeroViewModel viewModel;
+
+    public HeroAdapter(Context context, AdapterCallback callback) {
+//        this.heroes = heroes;
         this.context = context;
         this.mCallback = callback;
     }
+
+    public void setHeroesList(final List<? extends Hero> heroList, Context context) {
+        if (this.heroes == null) {
+            this.heroes = heroList;
+            this.context = context;
+
+            notifyItemRangeInserted(0, heroList.size());
+//           notifyItemRangeRemoved(0, measuresList.size());
+        }
+        else {
+            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new Callback() {
+                @Override
+                public int getOldListSize() {
+                    return HeroAdapter.this.heroes.size();
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return heroes.size();
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    return HeroAdapter.this.heroes.get(oldItemPosition) == heroes.get(newItemPosition);
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    Hero hero = heroes.get(newItemPosition);
+                    Hero old = heroes.get(oldItemPosition);
+                    return hero.isFavorite() == old.isFavorite() && Objects.equals(hero.getTitle(), old.getTitle());
+                }
+            });
+            this.heroes = heroList;
+            result.dispatchUpdatesTo(this);
+        }
+    }
+
 
 
     @NonNull
@@ -54,15 +103,19 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroHolder> {
             builder.append(", ");
         }
         holder.heroAbilitiesTv.setText(builder.toString());
-        holder.heart_ic.setVisibility(View.GONE);
+        if (heroes.get(position).isFavorite()) {
+            holder.heart_ic.setVisibility(View.VISIBLE);
+        } else {
+            holder.heart_ic.setVisibility(View.GONE);
+        }
 
         holder.cardView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 //pass selected hero to activity in order to update actionBar
-                mCallback.OnHeroSelected(heroes.get(position));
+                mCallback.OnHeroSelected(heroes.get(position), holder);
                 //show heart
-                setFavorite(heroes.get(position), holder);
+
 
             }
         });
@@ -80,10 +133,11 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroHolder> {
         if (lastSelected !=null) {
             lastSelected.setFavorite(false);
             setHeartVisibility(lastSelected, lastSelectedHeart);
+
         }
 
         hero.setFavorite(true);
-        holder.heart_ic.setVisibility(View.VISIBLE);
+        setHeartVisibility(hero, holder);
         lastSelected = hero;
         lastSelectedHeart = holder;
 

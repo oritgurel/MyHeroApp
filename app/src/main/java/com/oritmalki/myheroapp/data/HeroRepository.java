@@ -28,6 +28,7 @@ public class HeroRepository {
     private final IHeroAPIService heroAPIService;
     private final HeroDao heroDao;
     private final Executor executor;
+    LiveData<List<Hero>> liveHeroList;
 
     private MediatorLiveData<List<Hero>> mObservableHeroes;
 
@@ -50,12 +51,24 @@ public class HeroRepository {
 
     }
 
+    public void saveHero(Hero hero) {
+    executor.execute(() -> {
+        heroDao.save(hero);
+    });
+    }
+
     public LiveData<Hero> getHero(String title) {
         return heroDao.getHeroByName(title);
     }
 
     public LiveData<List<Hero>> getAllHeroes() {
-        refreshHeroes();
+    executor.execute(() -> {
+        if (heroDao.getAllHeroes().getValue() == null) {
+            if (heroDao.hasHeroes(getMaxRefreshTime(new Date())) != null)
+            refreshHeroes();
+        }
+    });
+
         return heroDao.getAllHeroes();
     }
 

@@ -62,10 +62,16 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         //configure actionbar
         toolbar = findViewById(R.id.main_toolbar);
         collapsingToolbarLayout = findViewById(R.id.main_collapsing);
+        titleImage = findViewById(R.id.title_image);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(true);
+
+
+
+        collapsingToolbarLayout.setTitle(actionBarTitle);
+        Glide.with(getApplicationContext()).load(actionBarImage).into(titleImage);
 
 
 
@@ -76,18 +82,10 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
 
 
 
-
-        //get Favorite hero from database if exists, if not - use first hero in list
-//        actionBarTitle = viewModel.getFavorite().getTitle();
-//        actionBarImage = viewModel.getFavorite().getImage();
-
-
-
         appBarLayout = findViewById(R.id.main_appBar);
         coordinatorLayout = findViewById(R.id.coordinator);
         topOfScreen = coordinatorLayout.getTop();
 
-//        lastSelected = viewModel.getFavorite();
 
     }
 
@@ -114,21 +112,25 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
 
                     for (Hero hero : heroes) {
                         if (hero.isFavorite())
-                            favHero = hero;
-                        }
+                            favHero = lastSelected = hero;
+
+                    }
+
+                    if (favHero != null) {
+                        actionBarTitle = favHero.getTitle();
+                        actionBarImage = favHero.getImage();
+                    } else {
+                        actionBarTitle = heroes.get(0).getTitle();
+                        actionBarImage = heroes.get(0).getImage();
+                    }
 
 
-                    actionBarTitle = favHero.getTitle();
-                    actionBarImage = favHero.getImage();
-
-
-                    collapsingToolbarLayout.setTitle(actionBarTitle);
-                    titleImage = findViewById(R.id.title_image);
-                    Glide.with(getApplicationContext()).load(actionBarImage).into(titleImage);
-
+                        collapsingToolbarLayout.setTitle(actionBarTitle);
+                        Glide.with(getApplicationContext()).load(actionBarImage).into(titleImage);
+                    }
 
                 }
-            }
+
         });
     }
 
@@ -158,9 +160,9 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
     //callback from adapter
     @Override
     public void OnHeroSelected(Hero hero, HeroHolder heroHolder) {
-//        actionBarTitle = hero.getTitle();
-//        actionBar.setTitle(actionBarTitle);
-//        Glide.with(this).load(hero.getImage()).into(titleImage);
+        actionBarTitle = hero.getTitle();
+        collapsingToolbarLayout.setTitle(actionBarTitle);
+        Glide.with(this).load(hero.getImage()).into(titleImage);
 
         setFavorite(hero, heroHolder);
 
@@ -196,6 +198,8 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
             } else  {
                 if (holder != null) {
                     holder.heart_ic.setVisibility(View.VISIBLE);
+                    collapsingToolbarLayout.setTitle(hero.getTitle());
+                    Glide.with(this).load(hero.getImage()).into(titleImage);
                 }
             }
 

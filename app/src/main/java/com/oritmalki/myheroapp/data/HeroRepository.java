@@ -76,7 +76,7 @@ public class HeroRepository {
         //check if hero was inserted for the first time and got a date stamp
         boolean heroExists = (heroDao.hasHero(getMaxRefreshTime(new Date())) != null);
         //if hero does not exists yet, update from web
-//        if (!heroExists) {
+        if (!heroExists) {
             heroAPIService.getHeroes().enqueue(new Callback<List<Hero>>() {
                 @Override
                 public void onResponse(Call<List<Hero>> call, Response<List<Hero>> response) {
@@ -96,7 +96,7 @@ public class HeroRepository {
 
                 }
             });
-//        }
+        }
     });
     }
 

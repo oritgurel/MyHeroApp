@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
     private CoordinatorLayout coordinatorLayout;
     private AppBarLayout appBarLayout;
     private int topOfScreen;
+    private int bottomOfScreen;
     private Hero favHero;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private FrameLayout container;
@@ -85,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
                     android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
                     ImageFragment imageFragment = ImageFragment.getInstance(currentImageUrl);
                     fm.beginTransaction().add(R.id.container, imageFragment).addToBackStack(imageFragment.getTag()).commit();
+                    appBarLayout.setExpanded(false);
 
                 }
             }
@@ -100,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         appBarLayout = findViewById(R.id.main_appBar);
         coordinatorLayout = findViewById(R.id.coordinator);
         topOfScreen = coordinatorLayout.getTop();
+        bottomOfScreen = coordinatorLayout.getBottom();
+
 
 
     }
@@ -267,8 +271,16 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         setImage(actionBarImage);
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
 
-
-
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (appBarLayout != null)
+        appBarLayout.setExpanded(true);
+    }
 }

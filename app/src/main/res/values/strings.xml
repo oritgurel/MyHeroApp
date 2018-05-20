@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MyHeroApp</string>
+    <string name="toolbar_title"></string>
 </resources>

@@ -12,6 +12,7 @@
         android:layout_marginHorizontal="@dimen/margin_hor"
         android:layout_marginVertical="@dimen/margin_ver"
         android:elevation="1dp"
+        app:cardCornerRadius="4dp"
         app:contentPadding="8dp"
         android:theme="@style/ThemeOverlay.AppCompat.Light">
 

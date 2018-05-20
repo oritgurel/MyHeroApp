@@ -30,7 +30,7 @@ public class AppModule {
     @Provides
     @Singleton
     AppDatabase provideDatabase(Application application) {
-        return Room.databaseBuilder(application, AppDatabase.class, "MyHeroes.db").build();
+        return Room.databaseBuilder(application, AppDatabase.class, "MyHeroes.db").fallbackToDestructiveMigration().build();
     }
 
     @Provides

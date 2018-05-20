@@ -28,6 +28,7 @@ public class HeroRepository {
     private final IHeroAPIService heroAPIService;
     private final HeroDao heroDao;
     private final Executor executor;
+    LiveData<List<Hero>> liveHeroList;
 
     private MediatorLiveData<List<Hero>> mObservableHeroes;
 
@@ -50,12 +51,22 @@ public class HeroRepository {
 
     }
 
+    public void saveHero(Hero hero) {
+    executor.execute(() -> {
+        heroDao.save(hero);
+    });
+    }
+
     public LiveData<Hero> getHero(String title) {
         return heroDao.getHeroByName(title);
     }
 
     public LiveData<List<Hero>> getAllHeroes() {
-        refreshHeroes();
+    executor.execute(() -> {
+            refreshHeroes();
+        }
+    );
+
         return heroDao.getAllHeroes();
     }
 
@@ -63,9 +74,9 @@ public class HeroRepository {
     executor.execute(() -> {
 
         //check if hero was inserted for the first time and got a date stamp
-        boolean heroExists = (heroDao.hasHeroes(getMaxRefreshTime(new Date())) != null);
+        boolean heroExists = (heroDao.hasHero(getMaxRefreshTime(new Date())) != null);
         //if hero does not exists yet, update from web
-//        if (!heroExists) {
+        if (!heroExists) {
             heroAPIService.getHeroes().enqueue(new Callback<List<Hero>>() {
                 @Override
                 public void onResponse(Call<List<Hero>> call, Response<List<Hero>> response) {
@@ -85,7 +96,7 @@ public class HeroRepository {
 
                 }
             });
-//        }
+        }
     });
     }
 

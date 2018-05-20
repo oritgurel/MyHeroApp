@@ -3,6 +3,8 @@ package com.oritmalki.myheroapp.ui;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
@@ -14,9 +16,23 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
+import android.widget.ImageSwitcher;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
+import android.widget.TextView;
+import android.widget.ViewSwitcher.ViewFactory;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.oritmalki.myheroapp.R;
 import com.oritmalki.myheroapp.data.Hero;
 import com.oritmalki.myheroapp.ui.HeroAdapter.HeroHolder;
@@ -32,8 +48,7 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
 
     private RecyclerView recyclerView;
     private HeroAdapter adapter;
-    private List<Hero> localHeroReference;
-    private ImageView titleImage;
+    private ImageSwitcher titleImage;
     private Toolbar toolbar;
     private ActionBar actionBar;
     private Hero lastSelected;
@@ -45,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
     private int topOfScreen;
     private Hero favHero;
     private CollapsingToolbarLayout collapsingToolbarLayout;
+    private FrameLayout container;
+    private String currentImageUrl;
 
 
 
@@ -58,20 +75,34 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        configureImageSwitcher();
+
+        //configure photo fragment
+        titleImage.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentImageUrl != null) {
+                    android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+                    ImageFragment imageFragment = ImageFragment.getInstance(currentImageUrl);
+                    fm.beginTransaction().add(R.id.container, imageFragment).addToBackStack(imageFragment.getTag()).commit();
+
+                }
+            }
+        });
+
+
+
 
         //configure actionbar
         toolbar = findViewById(R.id.main_toolbar);
         collapsingToolbarLayout = findViewById(R.id.main_collapsing);
-        titleImage = findViewById(R.id.title_image);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(true);
 
-
-
         collapsingToolbarLayout.setTitle(actionBarTitle);
-        Glide.with(getApplicationContext()).load(actionBarImage).into(titleImage);
+        setImage(actionBarImage);
 
 
 
@@ -88,14 +119,6 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
 
 
     }
-
-
-
-
-
-
-
-
 
 
 
@@ -126,7 +149,8 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
 
 
                         collapsingToolbarLayout.setTitle(actionBarTitle);
-                        Glide.with(getApplicationContext()).load(actionBarImage).into(titleImage);
+                        setImage(actionBarImage);
+
                     }
 
                 }
@@ -152,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         actionBar.setDisplayShowTitleEnabled(true);
 
 
-        Glide.with(this).load(heroes.get(0).getImage()).into(titleImage);
+//        Glide.with(this).load(heroes.get(0).getImage()).into((ImageView) titleImage.getCurrentView());
         getSupportActionBar().setTitle(heroes.get(0).getTitle());
 
     }
@@ -162,9 +186,11 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
     public void OnHeroSelected(Hero hero, HeroHolder heroHolder) {
         actionBarTitle = hero.getTitle();
         collapsingToolbarLayout.setTitle(actionBarTitle);
-        Glide.with(this).load(hero.getImage()).into(titleImage);
+
+//            setImage(hero.getImage());
 
         setFavorite(hero, heroHolder);
+        currentImageUrl = hero.getImage();
 
         appBarLayout.setExpanded(true);
         coordinatorLayout.scrollTo(0, topOfScreen);
@@ -197,17 +223,65 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
                 holder.heart_ic.setVisibility(View.GONE);
             } else  {
                 if (holder != null) {
+                    YoYo.with(Techniques.FadeIn).duration(700).playOn(holder.heart_ic);
                     holder.heart_ic.setVisibility(View.VISIBLE);
                     collapsingToolbarLayout.setTitle(hero.getTitle());
-                    Glide.with(this).load(hero.getImage()).into(titleImage);
+                    setImage(hero.getImage());
                 }
             }
 
         }
     }
 
+    public void configureImageSwitcher() {
+        //configure image switcher
+        Animation in = AnimationUtils.loadAnimation(this, R.anim.slide_in_left);
+        Animation out = AnimationUtils.loadAnimation(this, R.anim.slide_out_right);
+        titleImage = findViewById(R.id.title_image);
+        titleImage.setFactory(new ViewFactory() {
+
+            public View makeView() {
+                ImageView imageView = new ImageView(MainActivity.this);
+                imageView.setScaleType(ScaleType.CENTER_CROP);
+                LayoutParams params = new ImageSwitcher.LayoutParams(
+                        LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+                imageView.setLayoutParams(params);
+                return imageView;
+
+            }
+        });
+        titleImage.setInAnimation(in);
+        titleImage.setOutAnimation(out);
+    }
+
+    public void setImage(String imageUrl) {
+        //glide request options:
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions.diskCacheStrategyOf(DiskCacheStrategy.AUTOMATIC);
+
+        Glide.with(this).asBitmap().load(imageUrl).apply(requestOptions).into(new SimpleTarget<Bitmap>() {
+            @Override
+            public void onResourceReady(Bitmap resource, com.bumptech.glide.request.transition.Transition<? super Bitmap> transition) {
+                titleImage.setImageDrawable(new BitmapDrawable(getResources(), resource));
+            }
+        });
+    }
+
+    private TextView getToolbarTitleTextView() {
+        int childCount = toolbar.getChildCount();
+        TextView textView = null;
+        for (int i = 0; i < childCount; i++) {
+            View child = toolbar.getChildAt(i);
+            if (child instanceof TextView) {
+                textView = (TextView) child;
+            }
+        }
+
+        return textView;
+    }
 
 
 
-    // private void updateUI(@Nu
+
+
 }

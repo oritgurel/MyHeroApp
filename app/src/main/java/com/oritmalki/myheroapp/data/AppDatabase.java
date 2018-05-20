@@ -9,7 +9,6 @@ import android.arch.persistence.room.TypeConverters;
 @Database(entities = Hero.class, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
 
-    private static AppDatabase sInstance;
 
     public abstract HeroDao heroDao();
 

@@ -39,7 +39,6 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroHolder> {
     private HeroViewModel viewModel;
 
     public HeroAdapter(Context context, AdapterCallback callback) {
-//        this.heroes = heroes;
         this.context = context;
         this.mCallback = callback;
     }
@@ -50,7 +49,6 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroHolder> {
             this.context = context;
 
             notifyItemRangeInserted(0, heroList.size());
-//           notifyItemRangeRemoved(0, measuresList.size());
         }
         else {
             DiffUtil.DiffResult result = DiffUtil.calculateDiff(new Callback() {
@@ -114,10 +112,7 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroHolder> {
             public void onClick(View v) {
                 //pass selected hero to activity in order to update actionBar
                 mCallback.OnHeroSelected(heroes.get(position), holder);
-                //show heart
-
-
-            }
+                            }
         });
 
 

@@ -44,6 +44,7 @@ public class ImageFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.image_fragment, container, false);
         photoView = view.findViewById(R.id.photo_view);
+
         Glide.with(getActivity().getApplicationContext()).load(imageUrl).into(photoView);
 
 

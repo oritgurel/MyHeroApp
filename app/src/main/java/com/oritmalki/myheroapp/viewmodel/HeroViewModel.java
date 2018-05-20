@@ -54,6 +54,7 @@ public class HeroViewModel extends ViewModel {
         return mObservableHeroes;
     }
 
+
     public Hero getFavorite() {
         Hero favHeroName = null;
         for (Hero hero : heroes.getValue()) {

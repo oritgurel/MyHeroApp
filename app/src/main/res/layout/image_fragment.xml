@@ -8,6 +8,8 @@
     android:fitsSystemWindows="true"
     android:scaleType="centerCrop"
     android:background="@color/black"
+    style="@style/MaterialAnimations"
+    android:transitionName="@string/image_transition"
     >
 
 </com.github.chrisbanes.photoview.PhotoView>

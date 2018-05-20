@@ -39,6 +39,8 @@
                     android:layout_height="match_parent"
                     android:fitsSystemWindows="true"
                     app:layout_collapseMode="parallax"
+                    style="@style/MaterialAnimations"
+                    android:transitionName="@string/image_transition"
                     tools:src="@drawable/wonder_woman_g2_1500x1000"/>
 
                 <android.support.v7.widget.Toolbar
@@ -65,6 +67,7 @@
 
     <FrameLayout
         android:id="@+id/container"
+        android:layout_marginTop="75dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

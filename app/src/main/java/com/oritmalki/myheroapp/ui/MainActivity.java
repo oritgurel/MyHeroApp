@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
     private CoordinatorLayout coordinatorLayout;
     private AppBarLayout appBarLayout;
     private int topOfScreen;
+    private int bottomOfScreen;
     private Hero favHero;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private FrameLayout container;
@@ -85,28 +86,13 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
                     android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
                     ImageFragment imageFragment = ImageFragment.getInstance(currentImageUrl);
                     fm.beginTransaction().add(R.id.container, imageFragment).addToBackStack(imageFragment.getTag()).commit();
+                    appBarLayout.setExpanded(false);
 
                 }
             }
         });
 
-
-
-
-        //configure actionbar
-        toolbar = findViewById(R.id.main_toolbar);
-        collapsingToolbarLayout = findViewById(R.id.main_collapsing);
-        setSupportActionBar(toolbar);
-        actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(true);
-
-        collapsingToolbarLayout.setTitle(actionBarTitle);
-        setImage(actionBarImage);
-
-
-
-
+        configureActionBar();
         this.configureDagger();
         initRecyclerView();
         configureViewModel();
@@ -116,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         appBarLayout = findViewById(R.id.main_appBar);
         coordinatorLayout = findViewById(R.id.coordinator);
         topOfScreen = coordinatorLayout.getTop();
+        bottomOfScreen = coordinatorLayout.getBottom();
+
 
 
     }
@@ -142,6 +130,8 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
                     if (favHero != null) {
                         actionBarTitle = favHero.getTitle();
                         actionBarImage = favHero.getImage();
+                        currentImageUrl = favHero.getImage();
+
                     } else {
                         actionBarTitle = heroes.get(0).getTitle();
                         actionBarImage = heroes.get(0).getImage();
@@ -168,18 +158,6 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         recyclerView.setLayoutManager(lm);
     }
 
-    private void initToolbar(List<Hero> heroes) {
-        toolbar = findViewById(R.id.main_toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(true);
-
-
-//        Glide.with(this).load(heroes.get(0).getImage()).into((ImageView) titleImage.getCurrentView());
-        getSupportActionBar().setTitle(heroes.get(0).getTitle());
-
-    }
 
     //callback from adapter
     @Override
@@ -244,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
                 ImageView imageView = new ImageView(MainActivity.this);
                 imageView.setScaleType(ScaleType.CENTER_CROP);
                 LayoutParams params = new ImageSwitcher.LayoutParams(
-                        LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                 imageView.setLayoutParams(params);
                 return imageView;
 
@@ -267,6 +245,7 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         });
     }
 
+    //try to find collapsing toolbar textview for animation
     private TextView getToolbarTitleTextView() {
         int childCount = toolbar.getChildCount();
         TextView textView = null;
@@ -280,8 +259,28 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         return textView;
     }
 
+    public void configureActionBar() {
+        toolbar = findViewById(R.id.main_toolbar);
+        collapsingToolbarLayout = findViewById(R.id.main_collapsing);
+        setSupportActionBar(toolbar);
+        actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(true);
 
+        collapsingToolbarLayout.setTitle(actionBarTitle);
+        setImage(actionBarImage);
+    }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
 
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (appBarLayout != null)
+        appBarLayout.setExpanded(true);
+    }
 }

@@ -1,7 +1,6 @@
 package com.oritmalki.myheroapp.data;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MediatorLiveData;
 import android.widget.Toast;
 
 import com.oritmalki.myheroapp.App;
@@ -24,13 +23,10 @@ public class HeroRepository {
 
     private static int FRESH_TIMEOUT_IN_MINUTES = 3;
 
-    private static HeroRepository sInstance;
     private final IHeroAPIService heroAPIService;
     private final HeroDao heroDao;
     private final Executor executor;
-    LiveData<List<Hero>> liveHeroList;
 
-    private MediatorLiveData<List<Hero>> mObservableHeroes;
 
 
 @Inject
@@ -38,16 +34,6 @@ public class HeroRepository {
         this.heroAPIService = heroAPIService;
         this.heroDao = heroDao;
         this.executor = executor;
-
-
-//        mObservableHeroes = new MediatorLiveData<>();
-//        mObservableHeroes.addSource((LiveData<List<Hero>>) heroAPIService.getHeroes(), new Observer<List<Hero>>() {
-//
-//            @Override
-//            public void onChanged(@Nullable List<Hero> heroEntities) {
-//
-//            }
-//        });
 
     }
 
